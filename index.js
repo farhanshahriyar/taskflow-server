@@ -76,10 +76,28 @@ async function run() {
 
         // 2. tasks collection
         app.get('/tasks', async (req, res) => {
-            const cursor = taskCollection.find({});
+            const email = req.query.email;
+            const query = {
+                useremail: email
+            };
+            console.log(email)
+            const cursor = taskCollection.find(query);
             const tasks = await cursor.toArray();
             res.send(tasks);
         });
+        
+        // app.get('/tasks', async (req, res) => {
+        //     const { email, status } = req.query;
+        //     let query = {};
+        //     if (email) query.email = email;
+        //     if (status) query.status = status;
+            
+        //     const tasks = await taskCollection.find(query).toArray();
+        //     res.send(tasks);
+        //   });
+          
+          
+
 
         // 3. users collection by id
         app.get('/users/:id', async (req, res) => {
@@ -92,7 +110,7 @@ async function run() {
         });
 
         // 4. tasks collection by id
-        app.get('/tasks/:id', async (req, res) => { 
+        app.get('/tasks/:id', async (req, res) => {
             const id = req.params.id;
             const query = {
                 _id: ObjectId(id)
@@ -122,97 +140,27 @@ async function run() {
             res.json(result);
         });
 
-
-        // // all put request
-        // // 1. users collection by id
-        // app.put('/users/:id', async (req, res) => {
-        //     const id = req.params.id;
-        //     const updatedUser = req.body;
-        //     const filter = {
-        //         _id: ObjectId(id)
-        //     };
-        //     const options = {
-        //         upsert: true
-        //     };
-        //     const updateDoc = {
-        //         $set: {
-        //             name: updatedUser.name,
-        //             email: updatedUser.email,
-        //             password: updatedUser.password,
-        //             role: updatedUser.role,
-        //             tasks: updatedUser.tasks
-        //         },
-        //     };
-        //     const result = await userCollection.updateOne(filter, updateDoc, options);
-        //     res.json(result);
-        // });
-
-        // // 2. tasks collection by id
-        // app.put('/tasks/:id', async (req, res) => {
-        //     const id = req.params.id;
-        //     const updatedTask = req.body;
-        //     const filter = {
-        //         _id: ObjectId(id)
-        //     };
-        //     const options = {
-        //         upsert: true
-        //     };
-        //     const updateDoc = {
-        //         $set: {
-        //             title: updatedTask.title,
-        //             description: updatedTask.description,
-        //             status: updatedTask.status,
-        //             assignedTo: updatedTask.assignedTo,
-        //             createdBy: updatedTask.createdBy,
-        //             createdAt: updatedTask.createdAt,
-        //             updatedAt: updatedTask.updatedAt
-        //         },
-        //     };
-        //     const result = await taskCollection.updateOne(filter, updateDoc, options);
-        //     res.json(result);
-        // });
-
-        // // 3. tasks collection by id and status
-        // app.put('/tasks/:id/:status', async (req, res) => {
-        //     const id = req.params.id;
-        //     const status = req.params.status;
-        //     const filter = {
-        //         _id: ObjectId(id)
-        //     };
-        //     const options = {
-        //         upsert: true
-        //     };
-        //     const updateDoc = {
-        //         $set: {
-        //             status: status
-        //         },
-        //     };
-        //     const result = await taskCollection.updateOne(filter, updateDoc, options);
-        //     res.json(result);
-        // });
-
-        // // 4. users collection by id and tasks
-        // app.put('/users/:id/:tasks', async (req, res) => {
-        //     const id = req.params.id;
-        //     const tasks = req.params.tasks;
-        //     const filter = {
-        //         _id: ObjectId(id)
-        //     };
-        //     const options = {
-        //         upsert: true
-        //     };
-        //     const updateDoc = {
-        //         $set: {
-        //             tasks: tasks
-        //         },
-        //     };
-        //     const result = await userCollection.updateOne(filter, updateDoc, options);
-        //     res.json(result);
-        // });
+        // all update request
+        // 1. update request to start a task
+        app.put('/tasks/:id/start', async (req, res) => {
+            const id = req.params.id;
+            const {
+                status
+            } = req.body; 
+            const filter = {
+                _id: new ObjectId(id)
+            };
+            const updateDoc = {
+                $set: {
+                    status: status,
+                },
+            };
+            const result = await taskCollection.updateOne(filter, updateDoc);
+            res.json(result);
+        });
 
 
         // Send a ping to confirm a successful connection
-
         await client.db("admin").command({
             ping: 1
         });
