@@ -85,8 +85,8 @@ async function run() {
             const tasks = await cursor.toArray();
             res.send(tasks);
         });
-        
-          
+
+
         // 3. users collection by id
         app.get('/users/:id', async (req, res) => {
             const id = req.params.id;
@@ -101,7 +101,7 @@ async function run() {
         app.get('/tasks/:id', async (req, res) => {
             const id = req.params.id;
             const query = {
-                _id: ObjectId(id)
+                _id: new ObjectId(id)
             };
             const task = await taskCollection.findOne(query);
             res.json(task);
@@ -112,7 +112,7 @@ async function run() {
         app.delete('/users/:id', async (req, res) => {
             const id = req.params.id;
             const query = {
-                _id: ObjectId(id)
+                _id: new ObjectId(id)
             };
             const result = await userCollection.deleteOne(query);
             res.json(result);
@@ -122,7 +122,7 @@ async function run() {
         app.delete('/tasks/:id', async (req, res) => {
             const id = req.params.id;
             const query = {
-                _id: ObjectId(id)
+                _id: new ObjectId(id)
             };
             const result = await taskCollection.deleteOne(query);
             res.json(result);
@@ -134,7 +134,7 @@ async function run() {
             const id = req.params.id;
             const {
                 status
-            } = req.body; 
+            } = req.body;
             const filter = {
                 _id: new ObjectId(id)
             };
@@ -152,7 +152,7 @@ async function run() {
             const id = req.params.id;
             const {
                 status
-            } = req.body; 
+            } = req.body;
             const filter = {
                 _id: new ObjectId(id)
             };
@@ -165,6 +165,58 @@ async function run() {
             res.json(result);
         });
 
+        // 3. update task by id
+        app.put('/tasks/:id', async (req, res) => {
+            const id = req.params.id;
+            const {
+                positiontitle,
+                recemail,
+                cname,
+                cabout,
+                salary,
+                streetaddress,
+                region,
+                postalcode,
+                titletask, 
+                taskpriority,
+                taskdescription,
+                status,
+                // imageUrl,
+                date,
+            } = req.body;
+        
+            const filter = { _id: new ObjectId(id) };
+            const updateDoc = {
+                $set: {
+                    positiontitle,
+                    recemail,
+                    cname,
+                    cabout,
+                    salary,
+                    streetaddress,
+                    region,
+                    postalcode,
+                    titletask, 
+                    taskpriority,
+                    taskdescription,
+                    status,
+                    // imageUrl,
+                    date: new Date(date), // Converting to Date object
+                },
+            };
+        
+            try {
+                const result = await taskCollection.updateOne(filter, updateDoc);
+                if (result.modifiedCount === 0) {
+                    return res.status(404).json({ message: "No task found with the given ID." });
+                }
+                res.json({ message: "Task updated successfully.", result });
+            } catch (error) {
+                console.error(error);
+                res.status(500).json({ message: "An error occurred while updating the task." });
+            }
+        });
+        
 
         // Send a ping to confirm a successful connection
         await client.db("admin").command({
