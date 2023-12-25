@@ -86,19 +86,7 @@ async function run() {
             res.send(tasks);
         });
         
-        // app.get('/tasks', async (req, res) => {
-        //     const { email, status } = req.query;
-        //     let query = {};
-        //     if (email) query.email = email;
-        //     if (status) query.status = status;
-            
-        //     const tasks = await taskCollection.find(query).toArray();
-        //     res.send(tasks);
-        //   });
           
-          
-
-
         // 3. users collection by id
         app.get('/users/:id', async (req, res) => {
             const id = req.params.id;
@@ -143,6 +131,24 @@ async function run() {
         // all update request
         // 1. update request to start a task
         app.put('/tasks/:id/start', async (req, res) => {
+            const id = req.params.id;
+            const {
+                status
+            } = req.body; 
+            const filter = {
+                _id: new ObjectId(id)
+            };
+            const updateDoc = {
+                $set: {
+                    status: status,
+                },
+            };
+            const result = await taskCollection.updateOne(filter, updateDoc);
+            res.json(result);
+        });
+
+        // 2. update request to complete a task
+        app.put('/tasks/:id/complete', async (req, res) => {
             const id = req.params.id;
             const {
                 status
