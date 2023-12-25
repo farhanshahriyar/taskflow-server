@@ -69,7 +69,11 @@ async function run() {
         // all get request
         // 1. users collection
         app.get('/users', async (req, res) => {
-            const cursor = userCollection.find({});
+            const email = req.query.email;
+            const query = {
+                useremail: email
+            };
+            const cursor = userCollection.find(query);
             const users = await cursor.toArray();
             res.send(users);
         });
@@ -80,7 +84,7 @@ async function run() {
             const query = {
                 useremail: email
             };
-            console.log(email)
+            // console.log(email)
             const cursor = taskCollection.find(query);
             const tasks = await cursor.toArray();
             res.send(tasks);
@@ -90,8 +94,10 @@ async function run() {
         // 3. users collection by id
         app.get('/users/:id', async (req, res) => {
             const id = req.params.id;
+            const email = req.query.email;
             const query = {
-                _id: ObjectId(id)
+                _id: new ObjectId(id),
+                useremail: email
             };
             const user = await userCollection.findOne(query);
             res.json(user);
@@ -166,57 +172,41 @@ async function run() {
         });
 
         // 3. update task by id
+        // update operator (update single task)
         app.put('/tasks/:id', async (req, res) => {
             const id = req.params.id;
-            const {
-                positiontitle,
-                recemail,
-                cname,
-                cabout,
-                salary,
-                streetaddress,
-                region,
-                postalcode,
-                titletask, 
-                taskpriority,
-                taskdescription,
-                status,
-                // imageUrl,
-                date,
-            } = req.body;
-        
-            const filter = { _id: new ObjectId(id) };
+            const updatedTask = req.body;
+            // console.log('hit', id, updatedTask)
+            const filter = {
+                _id: new ObjectId(id)
+            };
+            const options = {
+                upsert: true
+            };
             const updateDoc = {
                 $set: {
-                    positiontitle,
-                    recemail,
-                    cname,
-                    cabout,
-                    salary,
-                    streetaddress,
-                    region,
-                    postalcode,
-                    titletask, 
-                    taskpriority,
-                    taskdescription,
-                    status,
-                    // imageUrl,
-                    date: new Date(date), // Converting to Date object
+                    positiontitle: updatedTask.positiontitle,
+                    recemail: updatedTask.recemail,
+                    cname: updatedTask.cname,
+                    cabout: updatedTask.cabout,
+                    salary: updatedTask.salary,
+                    streetaddress: updatedTask.streetaddress,
+                    region: updatedTask.region,
+                    postalcode: updatedTask.postalcode,
+                    titletask: updatedTask.titletask,
+                    taskpriority: updatedTask.taskpriority,
+                    taskdescription: updatedTask.taskdescription,
+                    imageUrl: updatedTask.imageUrl,
+                    dueDate: updatedTask.dueDate,
                 },
             };
-        
-            try {
-                const result = await taskCollection.updateOne(filter, updateDoc);
-                if (result.modifiedCount === 0) {
-                    return res.status(404).json({ message: "No task found with the given ID." });
-                }
-                res.json({ message: "Task updated successfully.", result });
-            } catch (error) {
-                console.error(error);
-                res.status(500).json({ message: "An error occurred while updating the task." });
-            }
+
+            const result = await taskCollection.updateOne(filter, updateDoc, options);
+            res.json(result);
         });
-        
+
+
+
 
         // Send a ping to confirm a successful connection
         await client.db("admin").command({
