@@ -197,7 +197,8 @@ async function run() {
                     taskpriority: updatedTask.taskpriority,
                     taskdescription: updatedTask.taskdescription,
                     imageUrl: updatedTask.imageUrl,
-                    dueDate: updatedTask.dueDate,
+                    date: updatedTask.date,
+                    postingDate: updatedTask.postingDate,
                 },
             };
 
